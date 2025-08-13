@@ -43,6 +43,16 @@ header {
 audio {
     width: 100%;
 }
+button {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+input[type=range] {
+    cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -63,12 +73,15 @@ const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
 let tracks = [];
 let currentIndex = 0;
 
+// Fetch all files in the folder (video/audio)
 async function fetchFiles(pageToken = "") {
-    let url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType='video/mp4'&fields=files(id,name),nextPageToken&pageSize=100&key=${API_KEY}`;
+    let url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+(mimeType contains 'video' or mimeType contains 'audio')&fields=files(id,name),nextPageToken&pageSize=100&key=${API_KEY}`;
     if (pageToken) url += `&pageToken=${pageToken}`;
     let res = await fetch(url);
     let data = await res.json();
-    tracks = tracks.concat(data.files);
+    if (data.files) {
+        tracks = tracks.concat(data.files);
+    }
     if (data.nextPageToken) {
         await fetchFiles(data.nextPageToken);
     }
@@ -77,6 +90,10 @@ async function fetchFiles(pageToken = "") {
 function renderPlaylist() {
     const playlist = document.getElementById("playlist");
     playlist.innerHTML = "";
+    if (tracks.length === 0) {
+        playlist.innerHTML = "<p>No public video/audio files found in folder.</p>";
+        return;
+    }
     tracks.forEach((track, index) => {
         let div = document.createElement("div");
         div.className = "track";
@@ -119,7 +136,9 @@ document.getElementById("prevBtn").onclick = () => {
 
 document.getElementById("seekBar").oninput = (e) => {
     const audioPlayer = document.getElementById("audioPlayer");
-    audioPlayer.currentTime = e.target.value * audioPlayer.duration;
+    if (audioPlayer.duration) {
+        audioPlayer.currentTime = e.target.value * audioPlayer.duration;
+    }
 };
 
 document.getElementById("volumeBar").oninput = (e) => {
@@ -128,9 +147,12 @@ document.getElementById("volumeBar").oninput = (e) => {
 
 document.getElementById("audioPlayer").ontimeupdate = () => {
     const audioPlayer = document.getElementById("audioPlayer");
-    document.getElementById("seekBar").value = audioPlayer.currentTime / audioPlayer.duration;
+    if (audioPlayer.duration) {
+        document.getElementById("seekBar").value = audioPlayer.currentTime / audioPlayer.duration;
+    }
 };
 
+// Init
 (async () => {
     await fetchFiles();
     renderPlaylist();
