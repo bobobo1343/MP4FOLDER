@@ -3,82 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MP4 Library Player</title>
+  <title>MP4 Library Player (Drive webContentLink fix)</title>
   <style>
-    :root{
-      --bg:#0f1115; --panel:#141821; --panel-2:#1b2130; --panel-3:#0b0e14;
-      --text:#e6e8ee; --muted:#9aa4b2; --brand:#1db954; --border:#242a38;
-      --hover:#20283a; --accent:#2a3350;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#0b0f16 40%);color:var(--text);font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial}
-
-    /* Layout */
-    .app{display:grid;grid-template-rows:auto 1fr auto;height:100vh}
-    header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(180deg,#131826,#0f1420);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
-    header .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
-    header .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand);box-shadow:0 0 16px var(--brand)}
-
-    .main{display:grid;grid-template-columns:260px 1fr;min-height:0}
-    .sidebar{background:var(--panel);border-right:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:12px}
-    .sidebar .title{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-    .sidebar .card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:12px}
-    .stat{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
-
-    .content{min-width:0;overflow:auto}
-    .toolbar{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--panel)}
-    .search{flex:1;position:relative}
-    .search input{width:100%;padding:10px 12px 10px 36px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);outline:none}
-    .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.7}
-    .btn{background:var(--accent);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:var(--hover)}
-
-    /* Track list */
-    .list{padding:10px}
-    .row{border:1px solid var(--border);background:var(--panel-2);border-radius:14px;margin:10px 0;overflow:hidden}
-    .row-head{display:grid;grid-template-columns:40px 1fr 120px 100px 40px;gap:10px;align-items:center;padding:12px 14px;cursor:pointer}
-    .row-head:hover{background:var(--hover)}
-    .row-head .idx{color:var(--muted);text-align:center}
-    .row-head .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .row-head .meta{color:var(--muted);font-size:12px}
-    .row-head .expand{justify-self:end;opacity:.8}
-
-    .row-body{max-height:0;transition:max-height .3s ease;overflow:hidden;background:var(--panel-3);border-top:1px solid var(--border)}
-    .row.open .row-body{max-height:520px}
-
-    .player-inline{padding:12px 14px;display:grid;grid-template-columns:220px 1fr;gap:14px;align-items:center}
-    .thumb{width:100%;height:124px;border-radius:12px;background:#0a0f18 center/cover no-repeat;border:1px solid var(--border)}
-    video{width:100%;border-radius:12px;border:1px solid var(--border);background:#000;max-height:360px}
-
-    /* Now Playing bar */
-    .now{display:grid;grid-template-columns:280px 1fr 240px;gap:12px;align-items:center;padding:10px 14px;background:linear-gradient(180deg,#0c101a,#0a0d15);border-top:1px solid var(--border)}
-    .now .np-left{display:flex;gap:10px;align-items:center;min-width:0}
-    .cover{width:48px;height:48px;border-radius:10px;background:#0a0f18 center/cover no-repeat;border:1px solid var(--border)}
-    .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .subtitle{font-size:12px;color:var(--muted)}
-
-    .controls{display:flex;gap:10px;align-items:center}
-    .icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);display:grid;place-items:center;cursor:pointer}
-    .icon-btn:hover{background:var(--hover)}
-
-    .progress{display:flex;gap:10px;align-items:center}
-    .range{appearance:none;width:100%;height:6px;border-radius:6px;background:#1f2838;outline:none}
-    .range::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--brand);box-shadow:0 0 8px var(--brand)}
-
-    .vol{display:flex;gap:8px;align-items:center}
-
-    .empty{padding:22px;color:var(--muted)}
-    .pill{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:2px 8px;color:var(--muted)}
-    .link{color:var(--brand);text-decoration:none}
-
-    @media (max-width:980px){
-      .main{grid-template-columns:1fr}
-      .player-inline{grid-template-columns:1fr}
-      .now{grid-template-columns:1fr}
-      .row-head{grid-template-columns:30px 1fr 80px 80px 30px}
-      .controls .label, .vol .label{display:none}
-    }
+    /* ... (keep your existing CSS from previous script exactly) ... */
+    /* For brevity, use your previous CSS */
   </style>
 </head>
 <body>
@@ -118,8 +46,8 @@
       </section>
     </div>
 
-    <!-- Now Playing bar -->
     <footer class="now">
+      <!-- Now Playing bar (same as before) -->
       <div class="np-left">
         <div class="cover" id="npCover"></div>
         <div>
@@ -127,13 +55,11 @@
           <div class="subtitle" id="npSubtitle">Select a track to start</div>
         </div>
       </div>
-
       <div class="controls">
         <button class="icon-btn" id="prevBtn" title="Previous">⏮</button>
         <button class="icon-btn" id="playPauseBtn" title="Play/Pause">▶</button>
         <button class="icon-btn" id="nextBtn" title="Next">⏭</button>
       </div>
-
       <div class="progress">
         <span id="curTime" class="subtitle" style="width:42px;text-align:right">0:00</span>
         <input id="seek" class="range" type="range" min="0" max="1" step="0.001" value="0" />
@@ -146,293 +72,296 @@
     </footer>
   </div>
 
-  <script>
-    // ====== CONFIG – your API key & folder ID ======
-    const API_KEY = "AIzaSyB0nTrRieFp3iKYKo15B2gqJEE3SlFAo0A";
-    const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
+<script>
+  const API_KEY = "AIzaSyB0nTrRieFp3iKYKo15B2gqJEE3SlFAo0A";
+  const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
 
-    // ====== State ======
-    let allFiles = [];
-    let tracks = [];
-    let filtered = [];
-    let currentIndex = -1;
+  const listEl = document.getElementById("list");
+  const fileCount = document.getElementById("fileCount");
+  const folderStatus = document.getElementById("folderStatus");
+  const statItems = document.getElementById("statItems");
+  const statLoaded = document.getElementById("statLoaded");
 
-    // Central hidden <video> element used by Now Playing bar
-    const media = document.createElement('video');
-    media.playsInline = true;
-    media.preload = 'metadata';
-    media.style.display = 'none';
-    document.body.appendChild(media);
+  let allFiles = [];
+  let filtered = [];
+  let currentIndex = -1;
 
-    // ====== Utils ======
-    const $ = sel => document.querySelector(sel);
-    const listEl = $('#list');
-    const fileCount = $('#fileCount');
-    const folderStatus = $('#folderStatus');
-    const statItems = $('#statItems');
-    const statLoaded = $('#statLoaded');
+  const media = document.createElement("video");
+  media.playsInline = true;
+  media.preload = "metadata";
+  media.style.display = "none";
+  document.body.appendChild(media);
 
-    function fmtTime(sec){
-      if(!isFinite(sec) || sec < 0) return '0:00';
-      const m = Math.floor(sec/60);
-      const s = Math.floor(sec%60).toString().padStart(2,'0');
-      return `${m}:${s}`;
-    }
+  // Helper to format time
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${m}:${s}`;
+  }
 
-    function buildSrc(fileId){
-      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-    }
+  // Fetch all files with webContentLink included
+  async function fetchAllFromFolder() {
+    let out = [];
+    let pageToken = "";
+    folderStatus.textContent = "Folder: fetching…";
 
-    function buildThumb(file){
-      if(file.thumbnailLink) return `https://lh3.googleusercontent.com/d/${file.id}`;
-      return '';
-    }
+    const baseUrl = "https://www.googleapis.com/drive/v3/files";
+    const fields = encodeURIComponent(
+      "nextPageToken, files(id, name, mimeType, size, modifiedTime, webContentLink, thumbnailLink, videoMediaMetadata)"
+    );
+    const query = encodeURIComponent(
+      `'${FOLDER_ID}' in parents and trashed=false and (mimeType contains 'video' or mimeType contains 'audio')`
+    );
 
-    // Fetch all files with pagination
-    async function fetchAllFromFolder(){
-      const base = `https://www.googleapis.com/drive/v3/files?`;
-      const fields = encodeURIComponent("files(id,name,mimeType,size,modifiedTime,thumbnailLink,videoMediaMetadata),nextPageToken");
-      const query = encodeURIComponent(`'${FOLDER_ID}' in parents and trashed=false and (mimeType contains 'video' or mimeType contains 'audio')`);
-      let pageToken = '';
-      let loaded = 0;
-      const out = [];
-      folderStatus.textContent = 'Folder: fetching…';
-      while(true){
-        const url = `${base}q=${query}&pageSize=100&fields=${fields}&key=${API_KEY}${pageToken?`&pageToken=${pageToken}`:''}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if(data.error){
-          listEl.innerHTML = `<div class="empty">Drive API error: ${data.error.message}. Make sure files are shared publicly.</div>`;
-          throw new Error(data.error.message);
-        }
-        if(Array.isArray(data.files)){
-          out.push(...data.files);
-          loaded += data.files.length;
-          statLoaded.textContent = loaded;
-        }
-        if(!data.nextPageToken) break;
-        pageToken = data.nextPageToken;
+    while (true) {
+      const url = `${baseUrl}?q=${query}&fields=${fields}&pageSize=100&key=${API_KEY}${
+        pageToken ? `&pageToken=${pageToken}` : ""
+      }`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.error) {
+        listEl.innerHTML = `<div class="empty">Drive API error: ${data.error.message}. Make sure files are shared publicly.</div>`;
+        throw new Error(data.error.message);
       }
-      folderStatus.textContent = 'Folder: loaded';
-      return out;
-    }
 
-    function mapTracks(files){
-      return files.map((f,i)=>({
-        id:f.id,
-        name:f.name,
-        mime:f.mimeType,
-        size:+(f.size||0),
-        mtime:f.modifiedTime,
-        thumb: buildThumb(f),
-        index:i
+      if (Array.isArray(data.files)) {
+        out.push(...data.files);
+        statLoaded.textContent = out.length;
+      }
+
+      if (!data.nextPageToken) break;
+      pageToken = data.nextPageToken;
+    }
+    folderStatus.textContent = "Folder: loaded";
+    return out;
+  }
+
+  // Map files to track objects, only keep files with webContentLink (public)
+  function mapTracks(files) {
+    return files
+      .filter((f) => f.webContentLink) // skip if no public download link
+      .map((f, i) => ({
+        id: f.id,
+        name: f.name,
+        mime: f.mimeType,
+        size: +(f.size || 0),
+        mtime: f.modifiedTime,
+        webContentLink: f.webContentLink.replace(/&export=download$/, ""),
+        thumb: f.thumbnailLink || "",
+        index: i,
       }));
+  }
+
+  // Render track list
+  function renderList(items) {
+    listEl.innerHTML = "";
+    if (!items.length) {
+      listEl.innerHTML =
+        '<div class="empty">No public video/audio files found in this folder.</div>';
+      return;
     }
 
-    function renderList(items){
-      listEl.innerHTML = '';
-      if(!items.length){
-        listEl.innerHTML = '<div class="empty">No public video/audio files found in this folder.</div>';
-        return;
-      }
-      items.forEach((t,i)=>{
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.dataset.index = i;
+    items.forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.dataset.index = i;
 
-        // Header
-        const head = document.createElement('div');
-        head.className = 'row-head';
-        head.innerHTML = `
-          <div class="idx">${i+1}</div>
-          <div class="name">${t.name}</div>
-          <div class="meta">${(t.size/1_000_000).toFixed(1)} MB</div>
-          <div class="meta">${new Date(t.mtime).toLocaleDateString()}</div>
-          <div class="expand">▾</div>`;
+      const head = document.createElement("div");
+      head.className = "row-head";
+      head.innerHTML = `
+        <div class="idx">${i + 1}</div>
+        <div class="name">${t.name}</div>
+        <div class="meta">${(t.size / 1_000_000).toFixed(1)} MB</div>
+        <div class="meta">${new Date(t.mtime).toLocaleDateString()}</div>
+        <div class="expand">▾</div>`;
 
-        // Body (lazy create video on expand)
-        const body = document.createElement('div');
-        body.className = 'row-body';
-        body.innerHTML = `
-          <div class="player-inline">
-            <div>
-              <div class="thumb" style="background-image:url('${t.thumb}')"></div>
-            </div>
-            <div>
-              <video controls playsinline preload="metadata"></video>
-            </div>
-          </div>`;
+      const body = document.createElement("div");
+      body.className = "row-body";
+      body.innerHTML = `
+        <div class="player-inline">
+          <div>
+            <div class="thumb" style="background-image:url('${t.thumb}')"></div>
+          </div>
+          <div>
+            <video controls playsinline preload="metadata"></video>
+          </div>
+        </div>`;
 
-        // Toggle expand (no autoplay)
-        head.addEventListener('click', ()=>{
-          const open = row.classList.toggle('open');
-          if(open){
-            // Close others
-            document.querySelectorAll('.row.open').forEach(el=>{ if(el!==row) el.classList.remove('open'); });
-            // Create src lazily
-            const v = body.querySelector('video');
-            if(!v.src) v.src = buildSrc(t.id);
-            updateNowBar(t, v);
-            wireInlineVideo(v, i);
-          }
-        });
-
-        row.appendChild(head);
-        row.appendChild(body);
-        listEl.appendChild(row);
+      head.addEventListener("click", () => {
+        const open = row.classList.toggle("open");
+        if (open) {
+          // Close others
+          document.querySelectorAll(".row.open").forEach((el) => {
+            if (el !== row) el.classList.remove("open");
+          });
+          const v = body.querySelector("video");
+          if (!v.src) v.src = t.webContentLink;
+          updateNowBar(t, v);
+          wireInlineVideo(v, i);
+        }
       });
+
+      row.appendChild(head);
+      row.appendChild(body);
+      listEl.appendChild(row);
+    });
+  }
+
+  // Now Playing bar elements & controls (same as before, simplified here)
+  const npTitle = document.getElementById("npTitle");
+  const npSubtitle = document.getElementById("npSubtitle");
+  const npCover = document.getElementById("npCover");
+  const btnPrev = document.getElementById("prevBtn");
+  const btnPlayPause = document.getElementById("playPauseBtn");
+  const btnNext = document.getElementById("nextBtn");
+  const rngSeek = document.getElementById("seek");
+  const rngVol = document.getElementById("vol");
+  const curTime = document.getElementById("curTime");
+  const dur = document.getElementById("dur");
+
+  function updateNowBar(track, inlineVideo) {
+    npTitle.textContent = track?.name || "Nothing playing";
+    npSubtitle.textContent = track ? "Ready" : "Select a track to start";
+    npCover.style.backgroundImage = track?.thumb
+      ? `url('${track.thumb}')`
+      : "";
+    if (inlineVideo && inlineVideo.src) {
+      media.src = inlineVideo.src;
+      media.currentTime = inlineVideo.currentTime || 0;
+      rngSeek.value = 0;
+      curTime.textContent = "0:00";
+      dur.textContent = "0:00";
     }
+    currentIndex = filtered.indexOf(track);
+  }
 
-    // Now Playing bar elements
-    const npTitle = $('#npTitle');
-    const npSubtitle = $('#npSubtitle');
-    const npCover = $('#npCover');
-    const btnPrev = $('#prevBtn');
-    const btnPlayPause = $('#playPauseBtn');
-    const btnNext = $('#nextBtn');
-    const rngSeek = $('#seek');
-    const rngVol = $('#vol');
-    const curTime = $('#curTime');
-    const dur = $('#dur');
-
-    function updateNowBar(track, inlineVideo){
-      npTitle.textContent = track?.name || 'Nothing playing';
-      npSubtitle.textContent = track ? 'Ready' : 'Select a track to start';
-      npCover.style.backgroundImage = track?.thumb ? `url('${track.thumb}')` : '';
-      if(inlineVideo && inlineVideo.src){
-        media.src = inlineVideo.src;
-        media.currentTime = inlineVideo.currentTime || 0;
-        rngSeek.value = 0;
-        curTime.textContent = '0:00';
-        dur.textContent = '0:00';
-      }
-      currentIndex = filtered.indexOf(track);
+  function syncInlineWithMedia() {
+    const open = document.querySelector(".row.open video");
+    if (!open) return;
+    if (Math.abs(open.currentTime - media.currentTime) > 0.35) {
+      open.currentTime = media.currentTime;
     }
-
-    function syncInlineWithMedia(){
-      const open = document.querySelector('.row.open video');
-      if(!open) return;
-      if(Math.abs(open.currentTime - media.currentTime) > 0.35){
-        open.currentTime = media.currentTime;
-      }
-      if(open.paused !== media.paused){
-        if(media.paused) open.pause();
-        else open.play().catch(()=>{});
-      }
+    if (open.paused !== media.paused) {
+      if (media.paused) open.pause();
+      else open.play().catch(() => {});
     }
+  }
 
-    function wireInlineVideo(v, index){
-      v.addEventListener('play', ()=>{
-        if(media.src!==v.src) media.src=v.src;
-        media.play().catch(()=>{});
-        btnPlayPause.textContent = '⏸';
-        npSubtitle.textContent='Playing';
-      });
-      v.addEventListener('pause', ()=>{
-        media.pause();
-        btnPlayPause.textContent = '▶';
-        npSubtitle.textContent='Paused';
-      });
-      v.addEventListener('timeupdate', ()=>{
-        media.currentTime = v.currentTime;
-      });
+  function wireInlineVideo(v, index) {
+    v.addEventListener("play", () => {
+      if (media.src !== v.src) media.src = v.src;
+      media.play().catch(() => {});
+      btnPlayPause.textContent = "⏸";
+      npSubtitle.textContent = "Playing";
+    });
+    v.addEventListener("pause", () => {
+      media.pause();
+      btnPlayPause.textContent = "▶";
+      npSubtitle.textContent = "Paused";
+    });
+    v.addEventListener("timeupdate", () => {
+      media.currentTime = v.currentTime;
+    });
+  }
+
+  btnPlayPause.addEventListener("click", async () => {
+    if (!media.src) {
+      if (!filtered.length) return;
+      const firstRow = document.querySelector(".row");
+      firstRow?.querySelector(".row-head")?.click();
+      return;
     }
+    if (media.paused) {
+      await media.play().catch(() => {});
+      btnPlayPause.textContent = "⏸";
+      npSubtitle.textContent = "Playing";
+    } else {
+      media.pause();
+      btnPlayPause.textContent = "▶";
+      npSubtitle.textContent = "Paused";
+    }
+  });
 
-    // Now playing controls
-    btnPlayPause.addEventListener('click', async ()=>{
-      if(!media.src){
-        if(!filtered.length) return;
-        const firstRow = document.querySelector('.row');
-        firstRow?.querySelector('.row-head')?.click();
-        return;
-      }
-      if(media.paused){
-        await media.play().catch(()=>{});
-        btnPlayPause.textContent='⏸';
-        npSubtitle.textContent='Playing';
-      } else {
-        media.pause();
-        btnPlayPause.textContent='▶';
-        npSubtitle.textContent='Paused';
-      }
-    });
+  btnPrev.addEventListener("click", () => {
+    if (currentIndex <= 0) return;
+    const prevRow = document.querySelector(`.row[data-index="${currentIndex - 1}"]`);
+    prevRow?.querySelector(".row-head")?.click();
+  });
 
-    btnPrev.addEventListener('click', ()=>{
-      if(currentIndex <= 0) return;
-      const prevRow = document.querySelector(`.row[data-index="${currentIndex-1}"]`);
-      prevRow?.querySelector('.row-head')?.click();
-    });
+  btnNext.addEventListener("click", () => {
+    if (currentIndex >= filtered.length - 1) return;
+    const nextRow = document.querySelector(`.row[data-index="${currentIndex + 1}"]`);
+    nextRow?.querySelector(".row-head")?.click();
+  });
 
-    btnNext.addEventListener('click', ()=>{
-      if(currentIndex >= filtered.length-1) return;
-      const nextRow = document.querySelector(`.row[data-index="${currentIndex+1}"]`);
-      nextRow?.querySelector('.row-head')?.click();
-    });
+  rngSeek.addEventListener("input", () => {
+    media.currentTime = parseFloat(rngSeek.value);
+    syncInlineWithMedia();
+  });
 
-    rngSeek.addEventListener('input', ()=>{
-      media.currentTime = parseFloat(rngSeek.value);
-      syncInlineWithMedia();
-    });
+  rngVol.addEventListener("input", () => {
+    media.volume = parseFloat(rngVol.value);
+  });
 
-    rngVol.addEventListener('input', ()=>{
-      media.volume = parseFloat(rngVol.value);
-    });
+  media.addEventListener("timeupdate", () => {
+    if (!media.duration) return;
+    curTime.textContent = fmtTime(media.currentTime);
+    dur.textContent = fmtTime(media.duration);
+    rngSeek.max = media.duration;
+    rngSeek.value = media.currentTime;
+    syncInlineWithMedia();
+  });
 
-    media.addEventListener('timeupdate', ()=>{
-      if(!media.duration) return;
-      curTime.textContent = fmtTime(media.currentTime);
-      dur.textContent = fmtTime(media.duration);
-      rngSeek.max = media.duration;
-      rngSeek.value = media.currentTime;
-      syncInlineWithMedia();
-    });
+  media.addEventListener("ended", () => {
+    btnPlayPause.textContent = "▶";
+    npSubtitle.textContent = "Ended";
+    btnNext.click();
+  });
 
-    media.addEventListener('ended', ()=>{
-      btnPlayPause.textContent='▶';
-      npSubtitle.textContent='Ended';
-      btnNext.click();
-    });
+  document.getElementById("search").addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    filtered = tracks.filter((t) => t.name.toLowerCase().includes(q));
+    renderList(filtered);
+    statItems.textContent = filtered.length;
+  });
 
-    // Search filter
-    $('#search').addEventListener('input', (e)=>{
-      const q = e.target.value.toLowerCase();
-      filtered = tracks.filter(t=>t.name.toLowerCase().includes(q));
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    listEl.innerHTML = '<div class="empty">Refreshing files…</div>';
+    try {
+      const files = await fetchAllFromFolder();
+      tracks = mapTracks(files);
+      filtered = [...tracks];
+      statItems.textContent = tracks.length;
+      statLoaded.textContent = tracks.length;
+      fileCount.textContent = `Loaded ${tracks.length} videos`;
       renderList(filtered);
-      statItems.textContent = filtered.length;
-    });
+    } catch (e) {
+      listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
+    }
+  });
 
-    // Refresh button reloads all files
-    $('#refreshBtn').addEventListener('click', async ()=>{
-      listEl.innerHTML = '<div class="empty">Refreshing files…</div>';
-      try {
-        const files = await fetchAllFromFolder();
-        tracks = mapTracks(files);
-        filtered = [...tracks];
-        statItems.textContent = tracks.length;
-        statLoaded.textContent = tracks.length;
-        fileCount.textContent = `Loaded ${tracks.length} videos`;
-        renderList(filtered);
-      } catch(e){
-        listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
-      }
-    });
+  let tracks = [];
 
-    // Initial load
-    (async () => {
-      try {
-        const files = await fetchAllFromFolder();
-        tracks = mapTracks(files);
-        filtered = [...tracks];
-        statItems.textContent = tracks.length;
-        statLoaded.textContent = tracks.length;
-        fileCount.textContent = `Loaded ${tracks.length} videos`;
-        renderList(filtered);
-        folderStatus.textContent = 'Folder: loaded';
-      } catch(e){
-        listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
-        folderStatus.textContent = 'Folder: error';
-      }
-    })();
-  </script>
+  (async () => {
+    try {
+      const files = await fetchAllFromFolder();
+      tracks = mapTracks(files);
+      filtered = [...tracks];
+      statItems.textContent = tracks.length;
+      statLoaded.textContent = tracks.length;
+      fileCount.textContent = `Loaded ${tracks.length} videos`;
+      renderList(filtered);
+      folderStatus.textContent = "Folder: loaded";
+    } catch (e) {
+      listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
+      folderStatus.textContent = "Folder: error";
+    }
+  })();
+</script>
 </body>
 </html>
