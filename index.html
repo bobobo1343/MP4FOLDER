@@ -1,162 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>My MP4 Music Player</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: white;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-header {
-    background-color: #1db954;
-    padding: 15px;
-    font-size: 20px;
-    font-weight: bold;
-}
-#playlist {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-}
-.track {
-    padding: 8px;
-    cursor: pointer;
-    border-bottom: 1px solid #333;
-}
-.track:hover {
-    background-color: #282828;
-}
-#player-controls {
-    background-color: #181818;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-audio {
-    width: 100%;
-}
-button {
-    background: none;
-    color: white;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-}
-input[type=range] {
-    cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MP4 Library Player</title>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#141821; --panel-2:#1b2130; --panel-3:#0b0e14;
+      --text:#e6e8ee; --muted:#9aa4b2; --brand:#1db954; --border:#242a38;
+      --hover:#20283a; --accent:#2a3350;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0b0f16 40%);color:var(--text);font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial}
+
+    /* Layout */
+    .app{display:grid;grid-template-rows:auto 1fr auto;height:100vh}
+    header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(180deg,#131826,#0f1420);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+    header .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
+    header .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand);box-shadow:0 0 16px var(--brand)}
+
+    .main{display:grid;grid-template-columns:260px 1fr;min-height:0}
+    .sidebar{background:var(--panel);border-right:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:12px}
+    .sidebar .title{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    .sidebar .card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:12px}
+    .stat{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+
+    .content{min-width:0;overflow:auto}
+    .toolbar{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--panel)}
+    .search{flex:1;position:relative}
+    .search input{width:100%;padding:10px 12px 10px 36px;border-radius:10px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);outline:none}
+    .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.7}
+    .btn{background:var(--accent);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{background:var(--hover)}
+
+    /* Track list */
+    .list{padding:10px}
+    .row{border:1px solid var(--border);background:var(--panel-2);border-radius:14px;margin:10px 0;overflow:hidden}
+    .row-head{display:grid;grid-template-columns:40px 1fr 120px 100px 40px;gap:10px;align-items:center;padding:12px 14px;cursor:pointer}
+    .row-head:hover{background:var(--hover)}
+    .row-head .idx{color:var(--muted);text-align:center}
+    .row-head .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .row-head .meta{color:var(--muted);font-size:12px}
+    .row-head .expand{justify-self:end;opacity:.8}
+
+    .row-body{max-height:0;transition:max-height .3s ease;overflow:hidden;background:var(--panel-3);border-top:1px solid var(--border)}
+    .row.open .row-body{max-height:520px}
+
+    .player-inline{padding:12px 14px;display:grid;grid-template-columns:220px 1fr;gap:14px;align-items:center}
+    .thumb{width:100%;height:124px;border-radius:12px;background:#0a0f18 center/cover no-repeat;border:1px solid var(--border)}
+    video{width:100%;border-radius:12px;border:1px solid var(--border);background:#000;max-height:360px}
+
+    /* Now Playing bar */
+    .now{display:grid;grid-template-columns:280px 1fr 240px;gap:12px;align-items:center;padding:10px 14px;background:linear-gradient(180deg,#0c101a,#0a0d15);border-top:1px solid var(--border)}
+    .now .np-left{display:flex;gap:10px;align-items:center;min-width:0}
+    .cover{width:48px;height:48px;border-radius:10px;background:#0a0f18 center/cover no-repeat;border:1px solid var(--border)}
+    .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .subtitle{font-size:12px;color:var(--muted)}
+
+    .controls{display:flex;gap:10px;align-items:center}
+    .icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);display:grid;place-items:center;cursor:pointer}
+    .icon-btn:hover{background:var(--hover)}
+
+    .progress{display:flex;gap:10px;align-items:center}
+    .range{appearance:none;width:100%;height:6px;border-radius:6px;background:#1f2838;outline:none}
+    .range::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--brand);box-shadow:0 0 8px var(--brand)}
+
+    .vol{display:flex;gap:8px;align-items:center}
+
+    .empty{padding:22px;color:var(--muted)}
+    .pill{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:2px 8px;color:var(--muted)}
+    .link{color:var(--brand);text-decoration:none}
+
+    @media (max-width:980px){
+      .main{grid-template-columns:1fr}
+      .player-inline{grid-template-columns:1fr}
+      .now{grid-template-columns:1fr}
+      .row-head{grid-template-columns:30px 1fr 80px 80px 30px}
+      .controls .label, .vol .label{display:none}
+    }
+  </style>
 </head>
 <body>
-<header>My MP4 Music Player</header>
-<div id="playlist"></div>
-<div id="player-controls">
-    <button id="prevBtn">⏮</button>
-    <button id="playPauseBtn">▶</button>
-    <button id="nextBtn">⏭</button>
-    <input type="range" id="seekBar" value="0" step="0.01">
-    <input type="range" id="volumeBar" min="0" max="1" step="0.01" value="1">
-</div>
-<audio id="audioPlayer" controls style="display:none;"></audio>
+  <div class="app">
+    <header>
+      <span class="brand"><span class="dot"></span> MP4 Library Player</span>
+      <span class="pill" id="fileCount">Loading…</span>
+      <span class="pill" id="folderStatus">Folder: connecting…</span>
+    </header>
 
-<script>
-const API_KEY = "AIzaSyB0nTrRieFp3iKYKo15B2gqJEE3SlFAo0A";
-const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
-let tracks = [];
-let currentIndex = 0;
+    <div class="main">
+      <aside class="sidebar">
+        <div class="title">Library</div>
+        <div class="card">
+          <div class="stat"><span>Source</span><span id="sourceType">Google Drive</span></div>
+          <div class="stat"><span>Items</span><span id="statItems">–</span></div>
+          <div class="stat"><span>Loaded</span><span id="statLoaded">0</span></div>
+        </div>
+        <div class="title">Tips</div>
+        <div class="card" style="color:var(--muted);font-size:13px">
+          Make sure your Drive files are shared as <b>Anyone with the link → Viewer</b>. If items don't play, check sharing.
+        </div>
+      </aside>
 
-// Fetch all files in the folder (video/audio)
-async function fetchFiles(pageToken = "") {
-    let url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+(mimeType contains 'video' or mimeType contains 'audio')&fields=files(id,name),nextPageToken&pageSize=100&key=${API_KEY}`;
-    if (pageToken) url += `&pageToken=${pageToken}`;
-    let res = await fetch(url);
-    let data = await res.json();
-    if (data.files) {
-        tracks = tracks.concat(data.files);
+      <section class="content">
+        <div class="toolbar">
+          <div class="search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input id="search" placeholder="Search videos by name…" />
+          </div>
+          <button class="btn" id="refreshBtn">Refresh</button>
+        </div>
+
+        <div id="list" class="list">
+          <div class="empty">Fetching your files…</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Now Playing bar -->
+    <footer class="now">
+      <div class="np-left">
+        <div class="cover" id="npCover"></div>
+        <div>
+          <div class="title" id="npTitle">Nothing playing</div>
+          <div class="subtitle" id="npSubtitle">Select a track to start</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="icon-btn" id="prevBtn" title="Previous">⏮</button>
+        <button class="icon-btn" id="playPauseBtn" title="Play/Pause">▶</button>
+        <button class="icon-btn" id="nextBtn" title="Next">⏭</button>
+      </div>
+
+      <div class="progress">
+        <span id="curTime" class="subtitle" style="width:42px;text-align:right">0:00</span>
+        <input id="seek" class="range" type="range" min="0" max="1" step="0.001" value="0" />
+        <span id="dur" class="subtitle" style="width:42px">0:00</span>
+        <div class="vol">
+          <span class="subtitle label">Vol</span>
+          <input id="vol" class="range" type="range" min="0" max="1" step="0.01" value="1" style="width:120px" />
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ====== CONFIG – replace with your values if needed ======
+    const API_KEY = "AIzaSyB0nTrRieFp3iKYKo15B2gqJEE3SlFAo0A";
+    const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
+
+    // ====== State ======
+    let allFiles = [];      // raw Drive files
+    let tracks = [];        // filtered + mapped
+    let filtered = [];      // current list view (search)
+    let currentIndex = -1;  // index in filtered
+
+    // Central hidden <video> element used by Now Playing bar
+    const media = document.createElement('video');
+    media.playsInline = true;
+    media.preload = 'metadata';
+    media.style.display = 'none';
+    document.body.appendChild(media);
+
+    // ====== Utils ======
+    const $ = sel => document.querySelector(sel);
+    const listEl = $('#list');
+    const fileCount = $('#fileCount');
+    const folderStatus = $('#folderStatus');
+    const statItems = $('#statItems');
+    const statLoaded = $('#statLoaded');
+
+    function fmtTime(sec){
+      if(!isFinite(sec) || sec < 0) return '0:00';
+      const m = Math.floor(sec/60); const s = Math.floor(sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
     }
-    if (data.nextPageToken) {
-        await fetchFiles(data.nextPageToken);
-    }
-}
 
-function renderPlaylist() {
-    const playlist = document.getElementById("playlist");
-    playlist.innerHTML = "";
-    if (tracks.length === 0) {
-        playlist.innerHTML = "<p>No public video/audio files found in folder.</p>";
+    function buildSrc(fileId){
+      // Stream via Drive API
+      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
+    }
+
+    function buildThumb(file){
+      // Prefer thumbnailLink if present; else transparent pixel
+      if(file.thumbnailLink) return `https://lh3.googleusercontent.com/d/${file.id}`;
+      return '';
+    }
+
+    // ====== Fetch from Drive (with pagination) ======
+    async function fetchAllFromFolder(){
+      const base = `https://www.googleapis.com/drive/v3/files?`;
+      const fields = encodeURIComponent("files(id,name,mimeType,size,modifiedTime,thumbnailLink,videoMediaMetadata),nextPageToken");
+      const query = encodeURIComponent(`'${FOLDER_ID}' in parents and trashed=false and (mimeType contains 'video' or mimeType contains 'audio')`);
+      let pageToken = '';
+      let loaded = 0;
+      const out = [];
+      folderStatus.textContent = 'Folder: fetching…';
+      while(true){
+        const url = `${base}q=${query}&pageSize=100&fields=${fields}&key=${API_KEY}${pageToken?`&pageToken=${pageToken}`:''}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.error){
+          listEl.innerHTML = `<div class="empty">Drive API error: ${data.error.message}. Make sure files are shared publicly.</div>`;
+          throw new Error(data.error.message);
+        }
+        if(Array.isArray(data.files)){
+          out.push(...data.files);
+          loaded += data.files.length;
+          statLoaded.textContent = loaded;
+        }
+        if(!data.nextPageToken) break;
+        pageToken = data.nextPageToken;
+      }
+      folderStatus.textContent = 'Folder: loaded';
+      return out;
+    }
+
+    function mapTracks(files){
+      return files.map((f,i)=>({
+        id:f.id,
+        name:f.name,
+        mime:f.mimeType,
+        size:+(f.size||0),
+        mtime:f.modifiedTime,
+        thumb: buildThumb(f),
+        index:i
+      }));
+    }
+
+    // ====== Render list ======
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(!items.length){
+        listEl.innerHTML = '<div class="empty">No public video/audio files found in this folder.</div>';
         return;
+      }
+      items.forEach((t,i)=>{
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.dataset.index = i;
+
+        // Header
+        const head = document.createElement('div');
+        head.className = 'row-head';
+        head.innerHTML = `
+          <div class="idx">${i+1}</div>
+          <div class="name">${t.name}</div>
+          <div class="meta">${(t.size/1_000_000).toFixed(1)} MB</div>
+          <div class="meta">${new Date(t.mtime).toLocaleDateString()}</div>
+          <div class="expand">▾</div>`;
+
+        // Body (lazy create video on expand)
+        const body = document.createElement('div');
+        body.className = 'row-body';
+        body.innerHTML = `
+          <div class="player-inline">
+            <div>
+              <div class="thumb" style="background-image:url('${t.thumb}')"></div>
+            </div>
+            <div>
+              <video controls playsinline preload="metadata"></video>
+            </div>
+          </div>`;
+
+        // Toggle expand (no autoplay)
+        head.addEventListener('click', ()=>{
+          const open = row.classList.toggle('open');
+          if(open){
+            // Close others
+            document.querySelectorAll('.row.open').forEach(el=>{ if(el!==row) el.classList.remove('open'); });
+            // Create src lazily
+            const v = body.querySelector('video');
+            if(!v.src) v.src = buildSrc(t.id);
+            // Do NOT autoplay (user requested option 2)
+            updateNowBar(t, v);
+            wireInlineVideo(v, i);
+          }
+        });
+
+        row.appendChild(head); row.appendChild(body);
+        listEl.appendChild(row);
+      });
     }
-    tracks.forEach((track, index) => {
-        let div = document.createElement("div");
-        div.className = "track";
-        div.textContent = track.name;
-        div.onclick = () => playTrack(index);
-        playlist.appendChild(div);
+
+    // Keep Now Playing bar in sync with whichever video is currently active
+    const npTitle = $('#npTitle');
+    const npSubtitle = $('#npSubtitle');
+    const npCover = $('#npCover');
+    const btnPrev = $('#prevBtn');
+    const btnPlayPause = $('#playPauseBtn');
+    const btnNext = $('#nextBtn');
+    const rngSeek = $('#seek');
+    const rngVol = $('#vol');
+    const curTime = $('#curTime');
+    const dur = $('#dur');
+
+    function updateNowBar(track, inlineVideo){
+      npTitle.textContent = track?.name || 'Nothing playing';
+      npSubtitle.textContent = track ? 'Ready' : 'Select a track to start';
+      npCover.style.backgroundImage = track?.thumb ? `url('${track.thumb}')` : '';
+      // Point central media element at the same source as inline video
+      if(inlineVideo && inlineVideo.src){
+        // Mirror src but keep media paused until user presses play
+        media.src = inlineVideo.src;
+        media.currentTime = inlineVideo.currentTime || 0;
+        rngSeek.value = 0;
+        curTime.textContent = '0:00';
+        dur.textContent = '0:00';
+      }
+      currentIndex = filtered.indexOf(track);
+    }
+
+    function syncInlineWithMedia(){
+      // Keep the expanded row's <video> in sync with central media
+      const open = document.querySelector('.row.open video');
+      if(!open) return;
+      // Only keep currentTime roughly aligned when playing
+      if(Math.abs(open.currentTime - media.currentTime) > 0.35){
+        open.currentTime = media.currentTime;
+      }
+      if(open.paused !== media.paused){
+        if(media.paused) open.pause(); else open.play().catch(()=>{});
+      }
+    }
+
+    function wireInlineVideo(v, index){
+      // When user presses play in inline video, drive the central media too
+      v.addEventListener('play', ()=>{ if(media.src!==v.src) media.src=v.src; media.play().catch(()=>{}); btnPlayPause.textContent = '⏸'; npSubtitle.textContent='Playing'; });
+      v.addEventListener('pause', ()=>{ media.pause(); btnPlayPause.textContent = '▶'; npSubtitle.textContent='Paused'; });
+      v.addEventListener('timeupdate', ()=>{ media.currentTime = v.currentTime; });
+    }
+
+    // Now bar controls operate on central media element
+    btnPlayPause.addEventListener('click', async ()=>{
+      if(!media.src){
+        // If nothing selected, open first item
+        if(!filtered.length) return;
+        const firstRow = document.querySelector('.row');
+        firstRow?.querySelector('.row-head')?.click();
+        return; // user can press play again if desired
+      }
+      if(media.paused){ await media.play().catch(()=>{}); btnPlayPause.textContent='⏸'; npSubtitle.textContent='Playing'; }
+      else { media.pause(); btnPlayPause.textContent='▶'; npSubtitle.textContent='Paused'; }
     });
-}
 
-function playTrack(index) {
-    currentIndex = index;
-    const audioPlayer = document.getElementById("audioPlayer");
-    const fileId = tracks[index].id;
-    const src = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-    audioPlayer.src = src;
-    audioPlayer.play();
-    document.getElementById("playPauseBtn").textContent = "⏸";
-}
+    btnPrev.addEventListener('click', ()=>{
+      if(!filtered.length) return;
+      const idx = currentIndex>0 ? currentIndex-1 : filtered.length-1;
+      openByIndex(idx);
+    });
+    btnNext.addEventListener('click', ()=>{
+      if(!filtered.length) return;
+      const idx = (currentIndex+1) % filtered.length;
+      openByIndex(idx);
+    });
 
-document.getElementById("playPauseBtn").onclick = () => {
-    const audioPlayer = document.getElementById("audioPlayer");
-    if (audioPlayer.paused) {
-        audioPlayer.play();
-        document.getElementById("playPauseBtn").textContent = "⏸";
-    } else {
-        audioPlayer.pause();
-        document.getElementById("playPauseBtn").textContent = "▶";
+    function openByIndex(i){
+      const row = document.querySelector(`.row[data-index="${i}"]`);
+      row?.querySelector('.row-head')?.click();
+      // After expanding, auto-start is still OFF per user request.
     }
-};
 
-document.getElementById("nextBtn").onclick = () => {
-    currentIndex = (currentIndex + 1) % tracks.length;
-    playTrack(currentIndex);
-};
+    // Seek + volume
+    rngSeek.addEventListener('input', ()=>{
+      if(media.duration) media.currentTime = media.duration * parseFloat(rngSeek.value);
+    });
+    rngVol.addEventListener('input', ()=>{ media.volume = parseFloat(rngVol.value); });
 
-document.getElementById("prevBtn").onclick = () => {
-    currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-    playTrack(currentIndex);
-};
+    media.addEventListener('timeupdate', ()=>{
+      if(media.duration){
+        rngSeek.value = (media.currentTime / media.duration).toFixed(3);
+        curTime.textContent = fmtTime(media.currentTime);
+        dur.textContent = fmtTime(media.duration);
+        syncInlineWithMedia();
+      }
+    });
+    media.addEventListener('ended', ()=>{ btnNext.click(); });
 
-document.getElementById("seekBar").oninput = (e) => {
-    const audioPlayer = document.getElementById("audioPlayer");
-    if (audioPlayer.duration) {
-        audioPlayer.currentTime = e.target.value * audioPlayer.duration;
+    // Search
+    $('#search').addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase().trim();
+      filtered = !q ? tracks : tracks.filter(t=>t.name.toLowerCase().includes(q));
+      renderList(filtered);
+    });
+
+    // Refresh
+    $('#refreshBtn').addEventListener('click', init);
+
+    // ====== Init ======
+    async function init(){
+      listEl.innerHTML = '<div class="empty">Fetching your files…</div>';
+      try{
+        allFiles = await fetchAllFromFolder();
+        tracks = mapTracks(allFiles);
+        filtered = tracks.slice();
+        statItems.textContent = tracks.length;
+        fileCount.textContent = `${tracks.length} items`;
+        renderList(filtered);
+      }catch(err){
+        console.error(err);
+      }
     }
-};
 
-document.getElementById("volumeBar").oninput = (e) => {
-    document.getElementById("audioPlayer").volume = e.target.value;
-};
-
-document.getElementById("audioPlayer").ontimeupdate = () => {
-    const audioPlayer = document.getElementById("audioPlayer");
-    if (audioPlayer.duration) {
-        document.getElementById("seekBar").value = audioPlayer.currentTime / audioPlayer.duration;
-    }
-};
-
-// Init
-(async () => {
-    await fetchFiles();
-    renderPlaylist();
-})();
-</script>
+    init();
+  </script>
 </body>
 </html>
