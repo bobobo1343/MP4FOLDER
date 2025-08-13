@@ -147,15 +147,15 @@
   </div>
 
   <script>
-    // ====== CONFIG – replace with your values if needed ======
+    // ====== CONFIG – your API key & folder ID ======
     const API_KEY = "AIzaSyB0nTrRieFp3iKYKo15B2gqJEE3SlFAo0A";
     const FOLDER_ID = "1TQcruPfeldisldQxIjNTXd6WSmX8jn8i";
 
     // ====== State ======
-    let allFiles = [];      // raw Drive files
-    let tracks = [];        // filtered + mapped
-    let filtered = [];      // current list view (search)
-    let currentIndex = -1;  // index in filtered
+    let allFiles = [];
+    let tracks = [];
+    let filtered = [];
+    let currentIndex = -1;
 
     // Central hidden <video> element used by Now Playing bar
     const media = document.createElement('video');
@@ -174,22 +174,21 @@
 
     function fmtTime(sec){
       if(!isFinite(sec) || sec < 0) return '0:00';
-      const m = Math.floor(sec/60); const s = Math.floor(sec%60).toString().padStart(2,'0');
+      const m = Math.floor(sec/60);
+      const s = Math.floor(sec%60).toString().padStart(2,'0');
       return `${m}:${s}`;
     }
 
     function buildSrc(fileId){
-      // Stream via Drive API
       return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
     }
 
     function buildThumb(file){
-      // Prefer thumbnailLink if present; else transparent pixel
       if(file.thumbnailLink) return `https://lh3.googleusercontent.com/d/${file.id}`;
       return '';
     }
 
-    // ====== Fetch from Drive (with pagination) ======
+    // Fetch all files with pagination
     async function fetchAllFromFolder(){
       const base = `https://www.googleapis.com/drive/v3/files?`;
       const fields = encodeURIComponent("files(id,name,mimeType,size,modifiedTime,thumbnailLink,videoMediaMetadata),nextPageToken");
@@ -230,7 +229,6 @@
       }));
     }
 
-    // ====== Render list ======
     function renderList(items){
       listEl.innerHTML = '';
       if(!items.length){
@@ -274,18 +272,18 @@
             // Create src lazily
             const v = body.querySelector('video');
             if(!v.src) v.src = buildSrc(t.id);
-            // Do NOT autoplay (user requested option 2)
             updateNowBar(t, v);
             wireInlineVideo(v, i);
           }
         });
 
-        row.appendChild(head); row.appendChild(body);
+        row.appendChild(head);
+        row.appendChild(body);
         listEl.appendChild(row);
       });
     }
 
-    // Keep Now Playing bar in sync with whichever video is currently active
+    // Now Playing bar elements
     const npTitle = $('#npTitle');
     const npSubtitle = $('#npSubtitle');
     const npCover = $('#npCover');
@@ -301,9 +299,7 @@
       npTitle.textContent = track?.name || 'Nothing playing';
       npSubtitle.textContent = track ? 'Ready' : 'Select a track to start';
       npCover.style.backgroundImage = track?.thumb ? `url('${track.thumb}')` : '';
-      // Point central media element at the same source as inline video
       if(inlineVideo && inlineVideo.src){
-        // Mirror src but keep media paused until user presses play
         media.src = inlineVideo.src;
         media.currentTime = inlineVideo.currentTime || 0;
         rngSeek.value = 0;
@@ -314,97 +310,129 @@
     }
 
     function syncInlineWithMedia(){
-      // Keep the expanded row's <video> in sync with central media
       const open = document.querySelector('.row.open video');
       if(!open) return;
-      // Only keep currentTime roughly aligned when playing
       if(Math.abs(open.currentTime - media.currentTime) > 0.35){
         open.currentTime = media.currentTime;
       }
       if(open.paused !== media.paused){
-        if(media.paused) open.pause(); else open.play().catch(()=>{});
+        if(media.paused) open.pause();
+        else open.play().catch(()=>{});
       }
     }
 
     function wireInlineVideo(v, index){
-      // When user presses play in inline video, drive the central media too
-      v.addEventListener('play', ()=>{ if(media.src!==v.src) media.src=v.src; media.play().catch(()=>{}); btnPlayPause.textContent = '⏸'; npSubtitle.textContent='Playing'; });
-      v.addEventListener('pause', ()=>{ media.pause(); btnPlayPause.textContent = '▶'; npSubtitle.textContent='Paused'; });
-      v.addEventListener('timeupdate', ()=>{ media.currentTime = v.currentTime; });
+      v.addEventListener('play', ()=>{
+        if(media.src!==v.src) media.src=v.src;
+        media.play().catch(()=>{});
+        btnPlayPause.textContent = '⏸';
+        npSubtitle.textContent='Playing';
+      });
+      v.addEventListener('pause', ()=>{
+        media.pause();
+        btnPlayPause.textContent = '▶';
+        npSubtitle.textContent='Paused';
+      });
+      v.addEventListener('timeupdate', ()=>{
+        media.currentTime = v.currentTime;
+      });
     }
 
-    // Now bar controls operate on central media element
+    // Now playing controls
     btnPlayPause.addEventListener('click', async ()=>{
       if(!media.src){
-        // If nothing selected, open first item
         if(!filtered.length) return;
         const firstRow = document.querySelector('.row');
         firstRow?.querySelector('.row-head')?.click();
-        return; // user can press play again if desired
+        return;
       }
-      if(media.paused){ await media.play().catch(()=>{}); btnPlayPause.textContent='⏸'; npSubtitle.textContent='Playing'; }
-      else { media.pause(); btnPlayPause.textContent='▶'; npSubtitle.textContent='Paused'; }
+      if(media.paused){
+        await media.play().catch(()=>{});
+        btnPlayPause.textContent='⏸';
+        npSubtitle.textContent='Playing';
+      } else {
+        media.pause();
+        btnPlayPause.textContent='▶';
+        npSubtitle.textContent='Paused';
+      }
     });
 
     btnPrev.addEventListener('click', ()=>{
-      if(!filtered.length) return;
-      const idx = currentIndex>0 ? currentIndex-1 : filtered.length-1;
-      openByIndex(idx);
+      if(currentIndex <= 0) return;
+      const prevRow = document.querySelector(`.row[data-index="${currentIndex-1}"]`);
+      prevRow?.querySelector('.row-head')?.click();
     });
+
     btnNext.addEventListener('click', ()=>{
-      if(!filtered.length) return;
-      const idx = (currentIndex+1) % filtered.length;
-      openByIndex(idx);
+      if(currentIndex >= filtered.length-1) return;
+      const nextRow = document.querySelector(`.row[data-index="${currentIndex+1}"]`);
+      nextRow?.querySelector('.row-head')?.click();
     });
 
-    function openByIndex(i){
-      const row = document.querySelector(`.row[data-index="${i}"]`);
-      row?.querySelector('.row-head')?.click();
-      // After expanding, auto-start is still OFF per user request.
-    }
-
-    // Seek + volume
     rngSeek.addEventListener('input', ()=>{
-      if(media.duration) media.currentTime = media.duration * parseFloat(rngSeek.value);
+      media.currentTime = parseFloat(rngSeek.value);
+      syncInlineWithMedia();
     });
-    rngVol.addEventListener('input', ()=>{ media.volume = parseFloat(rngVol.value); });
+
+    rngVol.addEventListener('input', ()=>{
+      media.volume = parseFloat(rngVol.value);
+    });
 
     media.addEventListener('timeupdate', ()=>{
-      if(media.duration){
-        rngSeek.value = (media.currentTime / media.duration).toFixed(3);
-        curTime.textContent = fmtTime(media.currentTime);
-        dur.textContent = fmtTime(media.duration);
-        syncInlineWithMedia();
-      }
+      if(!media.duration) return;
+      curTime.textContent = fmtTime(media.currentTime);
+      dur.textContent = fmtTime(media.duration);
+      rngSeek.max = media.duration;
+      rngSeek.value = media.currentTime;
+      syncInlineWithMedia();
     });
-    media.addEventListener('ended', ()=>{ btnNext.click(); });
 
-    // Search
+    media.addEventListener('ended', ()=>{
+      btnPlayPause.textContent='▶';
+      npSubtitle.textContent='Ended';
+      btnNext.click();
+    });
+
+    // Search filter
     $('#search').addEventListener('input', (e)=>{
-      const q = e.target.value.toLowerCase().trim();
-      filtered = !q ? tracks : tracks.filter(t=>t.name.toLowerCase().includes(q));
+      const q = e.target.value.toLowerCase();
+      filtered = tracks.filter(t=>t.name.toLowerCase().includes(q));
       renderList(filtered);
+      statItems.textContent = filtered.length;
     });
 
-    // Refresh
-    $('#refreshBtn').addEventListener('click', init);
-
-    // ====== Init ======
-    async function init(){
-      listEl.innerHTML = '<div class="empty">Fetching your files…</div>';
-      try{
-        allFiles = await fetchAllFromFolder();
-        tracks = mapTracks(allFiles);
-        filtered = tracks.slice();
+    // Refresh button reloads all files
+    $('#refreshBtn').addEventListener('click', async ()=>{
+      listEl.innerHTML = '<div class="empty">Refreshing files…</div>';
+      try {
+        const files = await fetchAllFromFolder();
+        tracks = mapTracks(files);
+        filtered = [...tracks];
         statItems.textContent = tracks.length;
-        fileCount.textContent = `${tracks.length} items`;
+        statLoaded.textContent = tracks.length;
+        fileCount.textContent = `Loaded ${tracks.length} videos`;
         renderList(filtered);
-      }catch(err){
-        console.error(err);
+      } catch(e){
+        listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
       }
-    }
+    });
 
-    init();
+    // Initial load
+    (async () => {
+      try {
+        const files = await fetchAllFromFolder();
+        tracks = mapTracks(files);
+        filtered = [...tracks];
+        statItems.textContent = tracks.length;
+        statLoaded.textContent = tracks.length;
+        fileCount.textContent = `Loaded ${tracks.length} videos`;
+        renderList(filtered);
+        folderStatus.textContent = 'Folder: loaded';
+      } catch(e){
+        listEl.innerHTML = `<div class="empty">Error loading files: ${e.message}</div>`;
+        folderStatus.textContent = 'Folder: error';
+      }
+    })();
   </script>
 </body>
 </html>
